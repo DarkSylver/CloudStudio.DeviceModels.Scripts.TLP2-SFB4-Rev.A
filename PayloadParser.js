@@ -1,3 +1,7 @@
+function isValid(value, min, max) {
+    return typeof value === 'number' && value >= min && value <= max;
+}
+
 function parseUplink(device, payload) {
 
     var payloadb = payload.asBytes();
@@ -63,7 +67,8 @@ function parseUplink(device, payload) {
         var e = device.endpoints.byAddress("6");
         if (e != null) {
             e.updateGenericSensorStatus(decodedMessage.batteryCharge);
-        }
+        };
+        device.updateDeviceBattery({ percentage: decodedMessage.batteryCharge });
     }
 
     // Device Solar Voltage
@@ -82,80 +87,88 @@ function parseUplink(device, payload) {
         }
     }
 
+    // Device Signal
+    if (decodedMessage.networkSignal != null) {
+        device.updateDeviceRssi({ type: rssiType.cellular, quality: decodedMessage.networkSignal });
+    }
+
     // BLE beacons
     if (decodedMessage.bleDataList != null && Array.isArray(decodedMessage.bleDataList)) {
         for (var i = 0; i < decodedMessage.bleDataList.length; i++) {
             var ble = decodedMessage.bleDataList[i];
-            if (ble && ble.mac === "d038f2f7c6c4" && ble.temp != null) {
-                var ep = device.endpoints.byAddress("9");
-                if (ep) {
-                    ep.updateTemperatureSensorStatus(ble.temp);
+            if (ble && ble.mac === "d038f2f7c6c4") {
+                if (isValid(ble.temp, -50, 100)) {
+                    var ep = device.endpoints.byAddress("9");
+                    if (ep) {
+                        ep.updateTemperatureSensorStatus(ble.temp);
+                    }
                 }
-            }
-            
-            if (ble && ble.mac === "d038f2f7c6c4" && ble.humidity != null) {
-                var ep = device.endpoints.byAddress("10");
-                if (ep) {
-                    ep.updateHumiditySensorStatus(ble.humidity);
+
+                if (isValid(ble.humidity, 0, 100)) {
+                    var ep = device.endpoints.byAddress("10");
+                    if (ep) {
+                        ep.updateHumiditySensorStatus(ble.humidity);
+                    }
                 }
-            }
-            
-            if (ble && ble.mac === "d038f2f7c6c4" && ble.lightIntensity != null) {
-                var ep = device.endpoints.byAddress("11");
-                if (ep) {
-                    ep.updateLightSensorStatus(ble.lightIntensity);
+
+                if (isValid(ble.lightIntensity, 0, 100000)) {
+                    var ep = device.endpoints.byAddress("11");
+                    if (ep) {
+                        ep.updateLightSensorStatus(ble.lightIntensity);
+                    }
+                }
+
+                if (isValid(ble.batteryPercent, 0, 100)) {
+                    var ep = device.endpoints.byAddress("12");
+                    if (ep) {
+                        ep.updateGenericSensorStatus(ble.batteryPercent);
+                    }
+                }
+
+                if (isValid(ble.rssi, -100, -20)) {
+                    var ep = device.endpoints.byAddress("13");
+                    if (ep) {
+                        ep.updateGenericSensorStatus(ble.rssi);
+                    }
                 }
             }
 
-            if (ble && ble.mac === "d038f2f7c6c4" && ble.batteryPercent != null) {
-                var ep = device.endpoints.byAddress("12");
-                if (ep) {
-                    ep.updateGenericSensorStatus(ble.batteryPercent);
+            if (ble && ble.mac === "e1e1b0e8c09d") {
+                if (isValid(ble.temp, -50, 100)) {
+                    var ep = device.endpoints.byAddress("14");
+                    if (ep) {
+                        ep.updateTemperatureSensorStatus(ble.temp);
+                    }
                 }
-            }
 
-            if (ble && ble.mac === "d038f2f7c6c4" && ble.rssi != null) {
-                var ep = device.endpoints.byAddress("13");
-                if (ep) {
-                    ep.updateGenericSensorStatus(ble.rssi);
+                if (isValid(ble.humidity, 0, 100)) {
+                    var ep = device.endpoints.byAddress("15");
+                    if (ep) {
+                        ep.updateHumiditySensorStatus(ble.humidity);
+                    }
                 }
-            }
 
-            if (ble && ble.mac === "e1e1b0e8c09d" && ble.temp != null) {
-                var ep = device.endpoints.byAddress("14");
-                if (ep) {
-                    ep.updateTemperatureSensorStatus(ble.temp);
+                if (isValid(ble.lightIntensity, 0, 100000)) {
+                    var ep = device.endpoints.byAddress("16");
+                    if (ep) {
+                        ep.updateLightSensorStatus(ble.lightIntensity);
+                    }
                 }
-            }
-            
-            if (ble && ble.mac === "e1e1b0e8c09d" && ble.humidity != null) {
-                var ep = device.endpoints.byAddress("15");
-                if (ep) {
-                    ep.updateHumiditySensorStatus(ble.humidity);
-                }
-            }
 
-            if (ble && ble.mac === "e1e1b0e8c09d" && ble.lightIntensity != null) {
-                var ep = device.endpoints.byAddress("16");
-                if (ep) {
-                    ep.updateLightSensorStatus(ble.lightIntensity);
+                if (isValid(ble.batteryPercent, 0, 100)) {
+                    var ep = device.endpoints.byAddress("17");
+                    if (ep) {
+                        ep.updateGenericSensorStatus(ble.batteryPercent);
+                    }
                 }
-            }
 
-            if (ble && ble.mac === "e1e1b0e8c09d" && ble.batteryPercent != null) {
-                var ep = device.endpoints.byAddress("17");
-                if (ep) {
-                    ep.updateGenericSensorStatus(ble.batteryPercent);
+                if (isValid(ble.rssi, -100, -20)) {
+                    var ep = device.endpoints.byAddress("18");
+                    if (ep) {
+                        ep.updateGenericSensorStatus(ble.rssi);
+                    }
                 }
             }
-
-            if (ble && ble.mac === "e1e1b0e8c09d" && ble.rssi != null) {
-                var ep = device.endpoints.byAddress("18");
-                if (ep) {
-                    ep.updateGenericSensorStatus(ble.rssi);
-                }
-            }
-            
         }
     } else {
         env.log("bleDataList is missing or not an array.");
